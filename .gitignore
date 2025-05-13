@@ -1,0 +1,119 @@
+## Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+*.log
+
+## Rider
+.idea/
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Mono Auto Generated Files
+mono_crash.*
+
+## Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+## VS Code
+.vscode/
+
+## Visual Studio
+.vs/
+*.ncb
+*.aps
+*.cache
+*.ilk
+*.log
+*.lib
+*.sbr
+*.sdf
+*.opensdf
+*.tlog
+*.pdb
+*.ipch
+*.iobj
+*.idb
+*.obj
+*.pch
+*.vsp
+*.vspscc
+*.vssscc
+*.dbmdl
+
+## DotCover
+*.dotCover
+
+## NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+*.psmdcp
+.packages/
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Build outputs
+*.dll
+*.exe
+
+## Publish
+publish/
+*.publish.xml
+
+# Azure Web Apps
+app.publish/
+
+## Temporary files
+*.tmp
+*.bak
+*.old
+*.orig
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# JetBrains Rider
+.idea/
+
+# Windows Installer files
+*.msi
+*.msm
+*.msp
+
+# Entity Framework
+*.designer.cs
+
+# SQL Server files
+*.mdf
+*.ldf
+
+# Dotnet watch
+**/tmp/
+
+# Local history for IDEs
+.localhistory/
+
+# Windows specific
+Desktop.ini
+$RECYCLE.BIN/
+
+# Other IDEs
+*.swp
+*.swo
+
+# Git directory info
+.git/
