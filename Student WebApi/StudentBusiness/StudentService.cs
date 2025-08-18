@@ -1,8 +1,9 @@
 ﻿using StuudentData;
+using StudentShared.Dtos;
 
 namespace StudentBusiness
 {
-    public class StudentCore
+    public class StudentService
     {
         public enum enMode { Add, Update};
         enMode mode = enMode.Add;
@@ -17,7 +18,7 @@ namespace StudentBusiness
             get { return new StudentDTO(this.studentID,this.name,this.grade ,this.age); }
         }
 
-        public StudentCore(StudentDTO studentDTO, enMode mode = enMode.Add)
+        public StudentService(StudentDTO studentDTO, enMode mode = enMode.Add)
         {
             this.studentID = studentDTO.studentID;
             this.name = studentDTO.name;
@@ -31,29 +32,29 @@ namespace StudentBusiness
         {
             //call DataAccess Layer 
 
-            this.studentID = StudentDataSource.AddNewStudent(SDTO);
+            this.studentID = StudentRepository.AddNewStudent(SDTO);
 
             return (this.studentID != -1);
         }
         private bool _UpdateStudent()
         {
-            return StudentDataSource.UpdateStudent(SDTO);
+            return StudentRepository.UpdateStudent(SDTO);
         }
         public static List<StudentDTO> GetAllStudents()
         {
-            return StudentDataSource.GetAllStudents();
+            return StudentRepository.GetAllStudents();
         }
         public static List<StudentDTO> GetPassedStudents()
         {
-            return StudentDataSource.GetPassedStudents();
+            return StudentRepository.GetPassedStudents();
         }
-        public static StudentCore Find(int studentID)
+        public static StudentService Find(int studentID)
         {
-            var studentDTO = StudentDataSource.GetStudentByID(studentID);
+            var studentDTO = StudentRepository.GetStudentByID(studentID);
 
             if (studentDTO != null)
             {
-                return new StudentCore(studentDTO,enMode.Update);
+                return new StudentService(studentDTO,enMode.Update);
             }
             else
             {
@@ -86,11 +87,11 @@ namespace StudentBusiness
         }
         public static bool DeleteStudent(int ID)
         {
-            return StudentDataSource.DeleteStudent(ID);
+            return StudentRepository.DeleteStudent(ID);
         }
         public static double GetAverageGrade()
         {
-            return StudentDataSource.GetAverageGrade();
+            return StudentRepository.GetAverageGrade();
         }
     }
 }

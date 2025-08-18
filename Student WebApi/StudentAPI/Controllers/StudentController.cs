@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StudentBusiness;
-using StuudentData;
+using StudentShared.Dtos;
 
 namespace Student_API_Project.Controllers
 {
@@ -14,7 +14,7 @@ namespace Student_API_Project.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<IEnumerable<StudentDTO>> GetAllStudents()
         {
-            List<StudentDTO> studentList = StudentCore.GetAllStudents();
+            List<StudentDTO> studentList = StudentService.GetAllStudents();
             if (studentList.Count == 0)
                 return NotFound("No student found");
 
@@ -28,7 +28,7 @@ namespace Student_API_Project.Controllers
         public ActionResult<IEnumerable<StudentDTO>> GetAllRoles()
         {
 
-            List<StudentDTO> studentList = StudentCore.GetAllStudents();
+            List<StudentDTO> studentList = StudentService.GetAllStudents();
             if (studentList.Count == 0)
                 return NotFound("No student found");
 
@@ -42,7 +42,7 @@ namespace Student_API_Project.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<IEnumerable<StudentDTO>> GetPassedStudents()
         {
-            List<StudentDTO> studentList = StudentCore.GetPassedStudents();
+            List<StudentDTO> studentList = StudentService.GetPassedStudents();
             if (studentList.Count == 0)
                 return NotFound("No student found");
             return Ok(studentList);
@@ -53,7 +53,7 @@ namespace Student_API_Project.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<double> GetGradeAVG()
         {
-            var gradeAVG = StudentCore.GetAverageGrade();
+            var gradeAVG = StudentService.GetAverageGrade();
             return Ok(gradeAVG);
         }
 
@@ -67,7 +67,7 @@ namespace Student_API_Project.Controllers
             if (studentID <= 0)
                 return BadRequest($"Wrong input, {studentID} is not acceptable.");
 
-            StudentCore student = StudentCore.Find(studentID);
+            StudentService student = StudentService.Find(studentID);
 
             if (student == null)
                 return NotFound($"No student found with ID {studentID}");
@@ -80,7 +80,7 @@ namespace Student_API_Project.Controllers
         }
 
 
-        [HttpPost(Name = "AddNewStudent")]
+        [HttpPost("New",Name = "AddNewStudent")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<StudentDTO> AddNewStudent(StudentDTO newStudent)
@@ -91,7 +91,7 @@ namespace Student_API_Project.Controllers
                 return BadRequest("Invalid student data.");
             }
 
-            var student = new StudentCore(newStudent);
+            var student = new StudentService(newStudent);
             student.Save();
             newStudent.studentID = student.studentID;
 
@@ -112,7 +112,7 @@ namespace Student_API_Project.Controllers
                 return BadRequest("Invalid student Id.");
             }
 
-            if (StudentCore.DeleteStudent(studentID))
+            if (StudentService.DeleteStudent(studentID))
             {
                 return Ok($"Student with ID {studentID} Has deleted");
             }
@@ -135,7 +135,7 @@ namespace Student_API_Project.Controllers
                 return BadRequest("Invalid student data.");
             }
 
-            var student = StudentCore.Find(studentID);            
+            var student = StudentService.Find(studentID);            
             if (student == null)
             {
                 return NotFound("Student is not exists");               

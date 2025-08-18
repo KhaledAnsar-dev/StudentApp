@@ -3,26 +3,12 @@ using StudentData;
 using System.Data;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
-
+using StudentShared.Dtos;
 namespace StuudentData
 {
-    public class StudentDTO
-    {
-        public StudentDTO(int studentID, string name, int grade, int age)
-        {
-            this.studentID = studentID;
-            this.name = name;
-            this.grade = grade;
-            this.age = age;
-        }
-        public int studentID { get; set; }
-        public string name { get; set; }
-        public int grade { get; set; }
-        public int age { get; set; }
+    
 
-    }
-
-    public class StudentDataSource
+    public class StudentRepository
     {
         static public StudentDTO GetStudentByID(int? studentID)
         {
