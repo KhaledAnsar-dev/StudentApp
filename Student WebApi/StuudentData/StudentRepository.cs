@@ -4,248 +4,124 @@ using System.Data;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
 using StudentShared.Dtos;
+using StudentData.DataModels;
 namespace StuudentData
 {
-    
+
 
     public class StudentRepository
     {
-        static public StudentDTO GetStudentByID(int? studentID)
+        public static StudentDTO? GetStudentByID(int? studentID)
         {
+            if (studentID is null) return null;
+
             try
             {
-                using (SqlConnection Connection = new SqlConnection(clsDataSettings.ConnectionString))
+                using (var ctx = new StudentDbContext())
                 {
-
-                    using (SqlCommand Command = new SqlCommand("SP_GetStudentByID", Connection))
-                    {
-                        Command.CommandType = CommandType.StoredProcedure;
-                        Connection.Open();
-                        Command.Parameters.AddWithValue("@StudentID", studentID);
-
-                        using (SqlDataReader reader = Command.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                return new StudentDTO
-                                   (
-                                       reader.GetInt32(reader.GetOrdinal("StudentID")),
-                                       reader.GetString(reader.GetOrdinal("Name")),
-                                       reader.GetInt32(reader.GetOrdinal("Grade")),
-                                       reader.GetInt32(reader.GetOrdinal("Age")));                                      
-                            }
-                        }
-                    }
+                    return ctx.Students
+                        .Where(x => x.StudentId == studentID.Value)
+                        .Select(s => new StudentDTO(
+                            s.StudentId,
+                            s.Name ?? string.Empty,
+                            s.Grade ?? 0,
+                            s.Age ?? 0
+                        ))
+                        .FirstOrDefault();
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                //string methodName = MethodBase.GetCurrentMethod().Name;
-                //clsEventLogger.LogError(ex.Message, methodName);
+                return null;
             }
-
-            return null;
         }
-        static public int AddNewStudent(StudentDTO newStudent)
+        public static int AddNewStudent(StudentDTO newStudent)
         {
-            int CreatedID = 0;
-
             try
             {
-                using (SqlConnection Connection = new SqlConnection(clsDataSettings.ConnectionString))
+                using (var ctx = new StudentDbContext())
                 {
-
-                    using (SqlCommand Command = new SqlCommand("SP_AddNewStudent", Connection))
+                    var entity = new Student
                     {
-                        Command.CommandType = CommandType.StoredProcedure;
-                        Command.Parameters.AddWithValue("@Name", newStudent.name);
-                        Command.Parameters.AddWithValue("@Grade", newStudent.grade);
-                        Command.Parameters.AddWithValue("@Age", newStudent.age);
+                        Name = newStudent.name,
+                        Grade = newStudent.grade,
+                        Age = newStudent.age
+                    };
 
-                        SqlParameter OutputID = new SqlParameter("@StudentID", SqlDbType.Int)
-                        {
-                            Direction = ParameterDirection.Output,
-                        };
-                        Command.Parameters.Add(OutputID);
-
-                        Connection.Open();
-
-                        Command.ExecuteNonQuery();
-                        CreatedID = (int)Command.Parameters["@StudentID"].Value;
-
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                //string methodName = MethodBase.GetCurrentMethod().Name;
-                //clsEventLogger.LogError(ex.Message, methodName);
-            }
-            return CreatedID;
-        }
-        static public bool UpdateStudent(StudentDTO updatedStudent)
-        {
-            int RowAffected = 0;
-            try
-            {
-                using (SqlConnection Connection = new SqlConnection(clsDataSettings.ConnectionString))
-                {
-                    using (SqlCommand Command = new SqlCommand("SP_UpdateStudent", Connection))
-                    {
-                        Command.CommandType = CommandType.StoredProcedure;
-
-                        Command.Parameters.AddWithValue("@StudentID", updatedStudent.studentID);
-                        Command.Parameters.AddWithValue("@Name", updatedStudent.name);
-                        Command.Parameters.AddWithValue("@Grade", updatedStudent.grade);
-                        Command.Parameters.AddWithValue("@Age", updatedStudent.age);
-
-                        Connection.Open();
-
-                        RowAffected = Command.ExecuteNonQuery();
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                //string methodName = MethodBase.GetCurrentMethod().Name;
-                //clsEventLogger.LogError(ex.Message, methodName);
-            }
-            return RowAffected > 0;
-        }
-        static public bool DeleteStudent(int studentID)
-        {
-            int RowAffected = 0;
-
-            try
-            {
-                using (SqlConnection Connection = new SqlConnection(clsDataSettings.ConnectionString))
-                {
-                    using (SqlCommand Command = new SqlCommand("SP_DeleteStudent", Connection))
-                    {
-                        Command.CommandType = CommandType.StoredProcedure;
-
-                        Command.Parameters.AddWithValue("@StudentID", studentID);
-
-                        Connection.Open();
-
-                        RowAffected = Command.ExecuteNonQuery();
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                //string methodName = MethodBase.GetCurrentMethod().Name;
-                //clsEventLogger.LogError(ex.Message, methodName);
-            }
-            return RowAffected > 0;
-        }
-        static public List<StudentDTO> GetAllStudents()
-        {
-            var studentList = new List<StudentDTO>();
-
-            try
-            {
-               using (SqlConnection Connection = new SqlConnection(clsDataSettings.ConnectionString))
-               {
-                   Connection.Open();
-                   using (SqlCommand Command = new SqlCommand("SP_GetAllStudents", Connection))
-                   {
-                       Command.CommandType = CommandType.StoredProcedure;
-
-                       using (SqlDataReader reader = Command.ExecuteReader())
-                       {
-                           while(reader.Read())
-                           {
-                               studentList.Add(new StudentDTO
-                                   (
-                                       reader.GetInt32(reader.GetOrdinal("StudentID")),
-                                       reader.GetString(reader.GetOrdinal("Name")),
-                                       reader.GetInt32(reader.GetOrdinal("Grade")),
-                                       reader.GetInt32(reader.GetOrdinal("Age"))
-                                   ));
-                           }
-                       }
-                   }
-               }
-            }
-            catch (Exception ex)
-            {
-                //string methodName = MethodBase.GetCurrentMethod().Name;
-                //clsEventLogger.LogError(ex.Message, methodName);
-            }
-
-            return studentList;
-        }
-        static public List<StudentDTO> GetPassedStudents()
-        {
-            var studentList = new List<StudentDTO>();
-
-            try
-            {
-                using (SqlConnection Connection = new SqlConnection(clsDataSettings.ConnectionString))
-                {
-                    Connection.Open();
-                    using (SqlCommand Command = new SqlCommand("SP_GetPassedStudents", Connection))
-                    {
-                        Command.CommandType = CommandType.StoredProcedure;
-
-                        using (SqlDataReader reader = Command.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                studentList.Add(new StudentDTO
-                                    (
-                                        reader.GetInt32(reader.GetOrdinal("StudentID")),
-                                        reader.GetString(reader.GetOrdinal("Name")),
-                                        reader.GetInt32(reader.GetOrdinal("Grade")),
-                                        reader.GetInt32(reader.GetOrdinal("Age"))
-                                    ));
-                            }
-                        }
-                    }
+                    ctx.Students.Add(entity);
+                    ctx.SaveChanges();
+                    return entity.StudentId; // DB-generated
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                //string methodName = MethodBase.GetCurrentMethod().Name;
-                //clsEventLogger.LogError(ex.Message, methodName);
+                // optional: log
+                return 0;
             }
-
-            return studentList;
         }
-        static public double GetAverageGrade()
+        public static bool UpdateStudent(StudentDTO updatedStudent)
         {
-            double averageGrade = 0;
             try
             {
-                using (SqlConnection Connection = new SqlConnection(clsDataSettings.ConnectionString))
+                using (var ctx = new StudentDbContext())
                 {
-                    Connection.Open();
-                    using (SqlCommand Command = new SqlCommand("SP_GetAverageGrade", Connection))
-                    {
-                        Command.CommandType = CommandType.StoredProcedure;
+                    var entity = ctx.Students.FirstOrDefault(s => s.StudentId == updatedStudent.studentID);
+                    if (entity is null) return false;
 
-                        object result = Command.ExecuteScalar();
+                    entity.Name = updatedStudent.name;
+                    entity.Grade = updatedStudent.grade;
+                    entity.Age = updatedStudent.age;
 
-                        if (result != DBNull.Value)
-                        {
-                            averageGrade = Convert.ToDouble(result);
-                        }
-                        else
-                            averageGrade = 0;
-                    }
+                    ctx.SaveChanges();
+                    return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                //string methodName = MethodBase.GetCurrentMethod().Name;
-                //clsEventLogger.LogError(ex.Message, methodName);
+                // optional: log
+                return false;
             }
+        }
+        public static bool DeleteStudent(int studentID)
+        {
+            try
+            {
+                using (var ctx = new StudentDbContext())
+                {
+                    var entity = ctx.Students.FirstOrDefault(s => s.StudentId == studentID);
+                    if (entity is null) return false;
 
-            return averageGrade;
+                    ctx.Students.Remove(entity);
+                    ctx.SaveChanges();
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+                // optional: log
+                return false;
+            }
+        }
+        public static List<StudentDTO> GetAllStudents()
+        {
+            try
+            {
+                using (var ctx = new StudentDbContext())
+                {
+                    return ctx.Students
+                        .Select(s => new StudentDTO(
+                            s.StudentId,
+                            s.Name ?? string.Empty,
+                            s.Grade ?? 0,
+                            s.Age ?? 0
+                        ))
+                        .ToList();
+                }
+            }
+            catch
+            {
+                return new List<StudentDTO>();
+            }
         }
     }
 }
