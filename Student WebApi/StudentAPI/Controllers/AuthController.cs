@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Student_API_Project.Models;
 using Student_API_Project.Services.Auth;
@@ -21,6 +22,7 @@ namespace Student_API_Project.Controllers
         // Endpoint: POST api/Auth/Login
         // Possible responses: 200 OK, 400 Bad Request, 401 Unauthorized
         [HttpPost("Login")]
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

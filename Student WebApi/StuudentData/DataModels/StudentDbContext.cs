@@ -20,7 +20,7 @@ public partial class StudentDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Name=ConnectionStrings:StudentDB");
+        => optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=StudentsDB;Integrated Security=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
