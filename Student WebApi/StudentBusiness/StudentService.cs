@@ -44,10 +44,7 @@ namespace StudentBusiness
         {
             return StudentRepository.GetAllStudents();
         }
-        public static List<StudentDTO> GetPassedStudents()
-        {
-            return StudentRepository.GetPassedStudents();
-        }
+
         public static StudentService Find(int studentID)
         {
             var studentDTO = StudentRepository.GetStudentByID(studentID);
@@ -88,10 +85,6 @@ namespace StudentBusiness
         public static bool DeleteStudent(int ID)
         {
             return StudentRepository.DeleteStudent(ID);
-        }
-        public static double GetAverageGrade()
-        {
-            return StudentRepository.GetAverageGrade();
         }
     }
 }
