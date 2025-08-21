@@ -1,10 +1,14 @@
 ﻿using StuudentData;
 using StudentShared.Dtos;
+using StudentData.Abstractions;
+using StudentBusiness.Abstractions;
 
 namespace StudentBusiness
 {
-    public class StudentService
+    public class StudentService : IStudentService
     {
+        private readonly IStudentRepository _repo;
+
         public enum enMode { Add, Update};
         enMode mode = enMode.Add;
 
@@ -27,64 +31,35 @@ namespace StudentBusiness
 
            this.mode = mode;
         }
-
-        private bool _AddNewStudent()
+        public StudentService(IStudentRepository repo)
         {
-            //call DataAccess Layer 
-
-            this.studentID = StudentRepository.AddNewStudent(SDTO);
-
-            return (this.studentID != -1);
-        }
-        private bool _UpdateStudent()
-        {
-            return StudentRepository.UpdateStudent(SDTO);
-        }
-        public static List<StudentDTO> GetAllStudents()
-        {
-            return StudentRepository.GetAllStudents();
+            _repo = repo;
         }
 
-        public static StudentService Find(int studentID)
+        public StudentDTO? AddStudent(StudentDTO studentDTO)
         {
-            var studentDTO = StudentRepository.GetStudentByID(studentID);
+            var id = _repo.AddNewStudent(studentDTO);
+            if (id == -1) return null;
 
-            if (studentDTO != null)
-            {
-                return new StudentService(studentDTO,enMode.Update);
-            }
-            else
-            {
-                return null;
-            }
+            studentDTO.studentID = id;
+            return studentDTO;
         }
-        public bool Save()
+
+        public StudentDTO? UpdateStudent(int studentID, StudentDTO studentDTO)
         {
-            switch (mode)
-            {
-                case enMode.Add:
-                    if (_AddNewStudent())
-                    {
+            var existing = _repo.GetStudentByID(studentID);
+            if (existing == null) return null;
 
-                        mode = enMode.Update;
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-
-                case enMode.Update:
-
-                    return _UpdateStudent();
-
-            }
-
-            return false;
+            studentDTO.studentID = studentID;
+            var success = _repo.UpdateStudent(studentDTO);
+            return success ? studentDTO : null;
         }
-        public static bool DeleteStudent(int ID)
+        public List<StudentDTO> GetAllStudents() => _repo.GetAllStudents();
+        public StudentDTO? Find(int studentID) => _repo.GetStudentByID(studentID);
+
+        public bool DeleteStudent(int ID)
         {
-            return StudentRepository.DeleteStudent(ID);
+            return _repo.DeleteStudent(ID);
         }
     }
 }

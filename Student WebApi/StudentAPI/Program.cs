@@ -3,7 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Student_API_Project.Services.Auth;
+using StudentBusiness.Abstractions;
+using StudentBusiness;
+using StudentData.Abstractions;
 using StudentData.DataModels;
+using StuudentData;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,8 +40,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddDbContext<StudentDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("StudentDB")));
 
-// Register custom JWT token generator service
+// Register custom services
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IStudentService, StudentService>();
 
 // ---------------- Add Controllers & Swagger ----------------
 builder.Services.AddControllers();

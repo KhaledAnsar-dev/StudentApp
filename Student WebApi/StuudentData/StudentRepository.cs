@@ -6,12 +6,17 @@ using System.Reflection.PortableExecutable;
 using StudentShared.Dtos;
 using StudentData.DataModels;
 using Microsoft.EntityFrameworkCore;
+using StudentData.Abstractions;
 namespace StuudentData
 {
 
 
-    public class StudentRepository
+    public class StudentRepository : IStudentRepository
     {
+        public StudentRepository()
+        {
+        }
+
         // Factory method: creates a new DbContext instance for each call
         private static StudentDbContext CreateContext() => new StudentDbContext();
 
@@ -20,7 +25,7 @@ namespace StuudentData
             new StudentDTO(s.StudentId, s.Name ?? string.Empty, s.Grade ?? 0, s.Age ?? 0);
 
         // Get one student by ID (returns null if not found)
-        public static StudentDTO? GetStudentByID(int? studentID)
+        public StudentDTO? GetStudentByID(int? studentID)
         {
             if (studentID is null || studentID <= 0) return null;
 
@@ -39,7 +44,7 @@ namespace StuudentData
         }
 
         // Insert a new student and return the generated ID
-        public static int AddNewStudent(StudentDTO newStudent)
+        public int AddNewStudent(StudentDTO newStudent)
         {
             if (newStudent is null || string.IsNullOrWhiteSpace(newStudent.name)) return 0;
 
@@ -64,7 +69,7 @@ namespace StuudentData
         }
 
         // Update an existing student (returns true if successful)
-        public static bool UpdateStudent(StudentDTO updatedStudent)
+        public bool UpdateStudent(StudentDTO updatedStudent)
         {
             if (updatedStudent is null || updatedStudent.studentID <= 0) return false;
 
@@ -88,7 +93,7 @@ namespace StuudentData
         }
 
         // Delete a student by ID
-        public static bool DeleteStudent(int studentID)
+        public bool DeleteStudent(int studentID)
         {
             if (studentID <= 0) return false;
 
@@ -108,7 +113,7 @@ namespace StuudentData
         }
 
         // Return all students in the database
-        public static List<StudentDTO> GetAllStudents()
+        public List<StudentDTO> GetAllStudents()
         {
             try
             {

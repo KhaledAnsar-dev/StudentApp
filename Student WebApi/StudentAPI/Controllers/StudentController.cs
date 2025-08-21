@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StudentBusiness;
+using StudentBusiness.Abstractions;
+using StudentData.Abstractions;
 using StudentShared.Dtos;
 
 namespace Student_API_Project.Controllers
@@ -10,7 +12,12 @@ namespace Student_API_Project.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
+        private readonly IStudentService _studentService;
+
+        public StudentController(IStudentService studentService) =>
+            _studentService = studentService;
         
+
         [HttpGet("All", Name = "GetAllStudents")]
         [Authorize(Roles = "Admin,Editor,Viewer")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -18,7 +25,7 @@ namespace Student_API_Project.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public ActionResult<IEnumerable<StudentDTO>> GetAllStudents()
         {
-            List<StudentDTO> studentList = StudentService.GetAllStudents();
+            List<StudentDTO> studentList = _studentService.GetAllStudents();
             if (studentList.Count == 0)
                 return NotFound("No student found");
 
@@ -37,16 +44,13 @@ namespace Student_API_Project.Controllers
             if (studentID <= 0)
                 return BadRequest($"Wrong input, {studentID} is not acceptable.");
 
-            StudentService student = StudentService.Find(studentID);
+            var student = _studentService.Find(studentID);
 
             if (student == null)
                 return NotFound($"No student found with ID {studentID}");
 
-            //here we get only the DTO object to send it back.
-            StudentDTO SDTO = student.SDTO;
-
             //we return the DTO not the student object.
-            return Ok(SDTO);
+            return Ok(student);
         }
 
 
@@ -57,18 +61,14 @@ namespace Student_API_Project.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public ActionResult<StudentDTO> AddNewStudent(StudentDTO newStudent)
         {
-            //we validate the data here
             if (newStudent == null || string.IsNullOrEmpty(newStudent.name) || newStudent.age < 0 || newStudent.grade < 0)
-            {
                 return BadRequest("Invalid student data.");
-            }
 
-            var student = new StudentService(newStudent);
-            student.Save();
-            newStudent.studentID = student.studentID;
+            var addedStudent = _studentService.AddStudent(newStudent);
+            if (addedStudent == null)
+                return BadRequest("Failed to add student.");
 
-            //we dont return Ok here,we return createdAtRoute: this will be status code 201 created.
-            return CreatedAtRoute("GetStudentById", new { studentID = newStudent.studentID}, newStudent);
+            return CreatedAtRoute("GetStudentById", new { studentID = addedStudent.studentID }, addedStudent);
         }
 
 
@@ -86,7 +86,7 @@ namespace Student_API_Project.Controllers
                 return BadRequest("Invalid student Id.");
             }
 
-            if (StudentService.DeleteStudent(studentID))
+            if (_studentService.DeleteStudent(studentID))
             {
                 return Ok($"Student with ID {studentID} Has deleted");
             }
@@ -105,23 +105,14 @@ namespace Student_API_Project.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public ActionResult<StudentDTO> UpdateStudent(int studentID , StudentDTO updatedStudent)
         {
-            //we validate the data here
             if (studentID < 1 || updatedStudent == null || string.IsNullOrEmpty(updatedStudent.name) || updatedStudent.age < 0 || updatedStudent.grade < 0)
-            {
                 return BadRequest("Invalid student data.");
-            }
 
-            var student = StudentService.Find(studentID);            
+            var student = _studentService.UpdateStudent(studentID, updatedStudent);
             if (student == null)
-            {
-                return NotFound("Student is not exists");               
-            }
+                return NotFound("Student not found.");
 
-            student.age = updatedStudent.age;
-            student.grade = updatedStudent.grade;
-            student.name = updatedStudent.name;
-            student.Save();
-            return Ok(student.SDTO);
+            return Ok(student);
         }
     }
 }
